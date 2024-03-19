@@ -105,7 +105,7 @@ lsr
 Command line format is:
 ```
 ./lsr <topologyFile> <messageFile> <changesFile> [outputFile]`
-`./dvr <topologyFile> <messageFile> <changesFile> [outputFile]
+./dvr <topologyFile> <messageFile> <changesFile> [outputFile]
 ```
 
 If outputFile is not specified then output should be written to output.txt 
