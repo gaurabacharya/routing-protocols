@@ -194,13 +194,12 @@ def link_state_routing(topology_file, message_file, changes_file, output_file='o
     link_state = update_nodes(nodes)
     write_topology(link_state, file)
     write_messages(link_state, msgs, file)
-    file.write('\n')
-
+    
     for i in range(len(changes)):
+        file.write('\n')
         link_state = change_topology(changes, i, nodes)
         write_topology(link_state, file)
         write_messages(link_state, msgs, file)
-        file.write('\n')
 
     file.close()
 

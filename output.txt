@@ -169,4 +169,3 @@ from 1 to 5 cost 5 hops 1 4 message Hey number 5, i am number 1
 from 1 to 2 cost 8 hops 1 message Hey number 2, i am number 1
 
 from 3 to 4 cost 11 hops 3 2 5 message Hey number 4, i am number 3
-
