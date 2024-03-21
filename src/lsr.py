@@ -23,49 +23,93 @@ def read_topology_file(topology_file):
             nodes[neighbor_id].add_neighbor(node_id, cost)
     return nodes
 
+def read_message_file(message_file):
+    msgs = []
+    with open(message_file, 'r') as file:
+        for line in file:
+            msgs.append(list(map(int, line.strip().split())))
 
-def initialize_link_state(nodes):
-    link_state = {}
-    for node_id, node in nodes.items():
-        link_state[node_id] = {neighbor: float('inf') for neighbor in nodes}
-        link_state[node_id][node_id] = 0  # distance to self is 0
-        for neighbor, cost in node.neighbors.items():
-            link_state[node_id][neighbor] = cost
+def find_next_hop(link_state):
+    for node_id, (d, p) in link_state.items():
+        n = {}
+
+        for p_node_id, prev_hop in p.items():
+            curr_node_id = p_node_id
+            while prev_hop != node_id:
+                curr_node_id = prev_hop
+                prev_hop = p[prev_hop]
+
+            n[p_node_id] = curr_node_id
+
+        link_state[node_id] = (d, p, n)
+    
     return link_state
 
+def update_nodes(nodes):
+    link_state = {}
 
-def dijkstra(nodes, source):
-    distances = {node_id: float('inf') for node_id in nodes}
-    distances[source] = 0
-    visited = set()
-    queue = [(0, source)]  # (distance, node_id)
+    for node_id, node in nodes.items():
+        n_prime = set()
+        n_prime.add(node_id)
 
-    while queue:
-        current_distance, current_node = heapq.heappop(queue)
-        if current_node in visited:
-            continue
-        visited.add(current_node)
+        d = {node_id: float('inf') for node_id in nodes}
+        p = {node_id: None for node_id in nodes}
 
-        for neighbor, cost in nodes[current_node].items():
-            distance = current_distance + cost
-            if distance < distances[neighbor]:
-                distances[neighbor] = distance
-                heapq.heappush(queue, (distance, neighbor))
+        d[node_id] = 0
+        p[node_id] = node_id
 
-    return distances
+        # Initialize step
+        for neighbor, cost in node.neighbors.items():
+            d[neighbor] = cost
+            p[neighbor] = node_id
+
+        while len(n_prime) < len(nodes):
+            min_cost = float('inf')
+            min_node_id = None
+            min_node = None
+
+            # Find the node not in n' with the smallest d
+            for alt_node_id, alt_node in nodes.items():
+                if alt_node_id not in n_prime:
+                    if d[alt_node_id] < min_cost or (min_node_id and d[alt_node_id] == min_cost and (alt_node_id < min_node_id)):
+                        min_cost = d[alt_node_id]
+                        min_node_id = alt_node_id
+                        min_node = alt_node
+                        
+            # Add the node to n'
+            n_prime.add(min_node_id)
+
+            # Update d and p
+            for neighbor, cost in min_node.neighbors.items():
+                if neighbor not in n_prime:
+                    d[neighbor] = min(d[neighbor], d[min_node_id] + cost)
+                    p[neighbor] = min_node_id
+                    
+        link_state[node_id] = (d, p)
+
+    link_state = find_next_hop(link_state)
+    return link_state
+
+def print_topology(link_state):
+    for i in range(1, len(link_state)+1):
+        for j in range(1, len(link_state)+1):
+            print(f'{j} {link_state[i][2][j]} {link_state[i][0][j]}')
+        print()
+
+    return
 
 
 def link_state_routing(topology_file, message_file, changes_file, output_file='output.txt'):
     nodes = read_topology_file(topology_file)
-    link_state = initialize_link_state(nodes)
+    link_state = update_nodes(nodes)
+    print_topology(link_state)
+
 
     # Implement the rest of the link-state routing algorithm here
     # For example, you can run Dijkstra's algorithm from each node to calculate shortest paths
 
     # Sample usage:
-    distances_from_node_1 = dijkstra(link_state, 1)
-    print(distances_from_node_1)
-    print("ho")
+    # print(link_state[1])
 
 
 if __name__ == "__main__":
