@@ -1,4 +1,15 @@
 class Node:
+    """
+    Represents a node in the network topology.
+
+    Attributes:
+    - node_id: the unique identifier of the node
+    - neighbors: a dictionary of neighbor nodes and their associated costs
+
+    Methods:
+    - add_neighbor(neighbor_id, cost): add a neighbor node with the given cost
+    - remove_neighbor(neighbor_id): remove the neighbor node with the given id
+    """
     def __init__(self, node_id):
         self.node_id = node_id
         self.neighbors = {}  # neighbor_id: cost
@@ -11,6 +22,15 @@ class Node:
 
 
 def read_topology_file(topology_file):
+    """
+    Read the network topology from the given file and create the corresponding nodes.
+
+    Args:
+    - topology_file: the file containing the network topology information
+
+    Returns:
+    - A dictionary of nodes, where the key is the node_id and the value is the Node object.
+    """
     nodes = {}
     with open(topology_file, 'r') as file:
         for line in file:
@@ -25,6 +45,15 @@ def read_topology_file(topology_file):
 
 
 def read_message_file(message_file):
+    """
+    Read the messages from the given file.
+
+    Args:
+    - message_file: the file containing the messages to be sent
+
+    Returns:
+    - A list of messages, where each message is a tuple (src_node_id, dest_node_id, msg_text)
+    """
     msgs = []
     with open(message_file, 'r') as file:
         for line in file:
@@ -35,6 +64,15 @@ def read_message_file(message_file):
 
 
 def read_topology_change_file(changes_file):
+    """
+    Read the topology changes from the given file.
+
+    Args:
+    - changes_file: the file containing the topology changes
+
+    Returns:
+    - A list of topology changes, where each change is a tuple (node_id, neighbor_id, cost)
+    """
     changes = []
     with open(changes_file, 'r') as file:
         for line in file:
@@ -44,6 +82,15 @@ def read_topology_change_file(changes_file):
 
 
 def find_next_hop(link_state):
+    """
+    Find the next hop for each destination in the link state information.
+
+    Args:
+    - link_state: the link state information for each node
+
+    Returns:
+    - The updated link state information with the next hop for each destination.
+    """
     for node_id, (d, p) in link_state.items():
         n = {}
 
@@ -68,6 +115,15 @@ def find_next_hop(link_state):
 
 
 def count_unreachable_nodes(nodes):
+    """
+    Count the number of unreachable nodes in the network.
+
+    Args:
+    - nodes: a dictionary of nodes in the network
+
+    Returns:
+    - A set of node_ids that are unreachable from any other node.
+    """
     unreachable_nodes = set()
     for node_id, node in nodes.items():
         if len(node.neighbors) == 0:
@@ -76,6 +132,15 @@ def count_unreachable_nodes(nodes):
 
 
 def get_hops(link_state, src_node_id, dest_node_id):
+    """
+    Get the sequence of nodes to traverse from the source node to the destination node.
+
+    Args:
+    - link_state: the link state information for each node
+
+    Returns:
+    - A list of node_ids representing the sequence of nodes to traverse from the source to the destination.
+    """
     hops = []
     curr_node_id = src_node_id
     while curr_node_id != dest_node_id:
@@ -94,6 +159,16 @@ def get_hops(link_state, src_node_id, dest_node_id):
 
 
 def update_nodes(nodes):
+    """
+    Update the link state information for each node in the network.
+
+    Args:
+    - nodes: a dictionary of nodes in the network
+
+    Returns:
+    - A dictionary of link state information for each node, where the key is the node_id and the value is a tuple (d, p, n),
+      where d is the path cost to each destination, p is the previous hop to each destination, and n is the next hop to each destination.
+    """
     link_state = {}
 
     # Get unreachable nodes
@@ -148,6 +223,17 @@ def update_nodes(nodes):
 
 
 def change_topology(changes, index, nodes):
+    """
+    Change the network topology based on the given changes.
+
+    Args:
+    - changes: a list of topology changes
+    - index: the index of the change to apply
+    - nodes: a dictionary of nodes in the network
+
+    Returns:
+    - The updated link state information after applying the change.
+    """
     node_id, neighbor_id, cost = changes[index]
 
     if cost == -999:
@@ -162,6 +248,13 @@ def change_topology(changes, index, nodes):
 
 
 def write_topology(link_state, file):
+    """
+    Write the node topology information to the given file.
+
+    Args:
+    - link_state: the link state information for each node
+    - file: the file to write the information to
+    """
     for i in range(1, len(link_state)+1):
         for j in range(1, len(link_state)+1):
             dest = j
@@ -174,6 +267,14 @@ def write_topology(link_state, file):
 
 
 def write_messages(link_state, msgs, file):
+    """
+    Write the messages and their corresponding paths to the given file.
+
+    Args:
+    - link_state: the link state information for each node
+    - msgs: a list of messages to be sent
+    - file: the file to write the information to
+    """
     for src_node_id, dest_node_id, msg_text in msgs:
         hops = get_hops(link_state, src_node_id, dest_node_id)
         cost = link_state[src_node_id][0][dest_node_id]
@@ -185,6 +286,18 @@ def write_messages(link_state, msgs, file):
 
 
 def link_state_routing(topology_file, message_file, changes_file, output_file='output.txt'):
+    """
+    Execute the link state routing algorithm using the given files as input.
+
+    Args:
+    - topology_file: the file containing the network topology information
+    - message_file: the file containing the messages to be sent
+    - changes_file: the file containing the topology changes
+    - output_file: the file to write the output to
+
+    Returns:
+    - A file containing the output of the link state routing algorithm
+    """
     nodes = read_topology_file(topology_file)
     msgs = read_message_file(message_file)
     changes = read_topology_change_file(changes_file)
