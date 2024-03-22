@@ -58,9 +58,12 @@ def bellman_ford(dst, routers, links):
 
 def update_distance_vector(node, distance_vector, nexthop):
     for destination, cost in distance_vector.items():
-        if destination != node.node_id and destination in nexthop and cost != float('inf'):
+        # if destination != node.node_id and destination in nexthop and cost != float('inf'):
+        if destination in nexthop and cost != float("inf"):
             nextNode = 0
-            if nexthop[destination] == node.node_id:
+            if destination == node.node_id:
+                node.update_routing_table(destination, destination, 0)
+            elif nexthop[destination] == node.node_id:
                 nextNode = destination
                 node.update_routing_table(destination, nextNode, cost)
             else:
@@ -71,14 +74,16 @@ def update_distance_vector(node, distance_vector, nexthop):
                         break
                     nextNode = nexthop[nextNode]
                 node.update_routing_table(destination, nextNode, cost)
-            
+        
 def run_bellman_ford(nodes, routers, links):
     for node_id, node in nodes.items():
         distance_vector, nexthop = bellman_ford(node_id, routers, links)
+        nexthop[node_id] = node_id
         update_distance_vector(node, distance_vector, nexthop)
         
 def write_routing_table(nodes, output_file):
-    for node_id, node in nodes.items():
+    sorted_nodes = dict(sorted(nodes.items()))
+    for node_id, node in sorted_nodes.items():
         sorted_table = sorted(node.routing_table.items(), key=lambda x: x[0])
         with open(output_file, 'a') as f:
             for dest, (next_hop, path_cost) in sorted_table:
