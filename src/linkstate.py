@@ -91,26 +91,23 @@ def find_next_hop(link_state):
     Returns:
     - The updated link state information with the next hop for each destination.
     """
-    for node_id, (d, p) in link_state.items():
+    for src_node_id, (d, p) in link_state.items():
         n = {}
 
-        # p_node_id is the destination node_id initially and prev_hop is the previous hop to reach the destination
-        for p_node_id, prev_hop in p.items():
-            curr_node_id = p_node_id
-            while prev_hop and (prev_hop != node_id):
-                curr_node_id = prev_hop
+        for dst_node_id, prev_hop_node_id in p.items():
+            curr_node_id = dst_node_id
+            while prev_hop_node_id and (prev_hop_node_id != src_node_id):
+                curr_node_id = prev_hop_node_id
+                prev_hop_node_id = p[prev_hop_node_id]
 
-                if not prev_hop:
-                    break
-
-                prev_hop = p[prev_hop]
-
-            if not prev_hop:
-                n[p_node_id] = None
+            # If the while loop ends, the previous hop of curr_node_id is None (unreachable) or the source node
+            if not prev_hop_node_id:
+                n[dst_node_id] = None
             else:
-                n[p_node_id] = curr_node_id
+                # Set the next hop from the source to get to dst to be the current node (who's previous hop is the source node)
+                n[dst_node_id] = curr_node_id
 
-        link_state[node_id] = (d, p, n)
+        link_state[src_node_id] = (d, p, n)
     
     return link_state
 
