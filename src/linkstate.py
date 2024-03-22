@@ -3,113 +3,113 @@ class Node:
     Represents a node in the network topology.
 
     Attributes:
-    - node_id: the unique identifier of the node
+    - nodeId: the unique identifier of the node
     - neighbors: a dictionary of neighbor nodes and their associated costs
 
     Methods:
-    - add_neighbor(neighbor_id, cost): add a neighbor node with the given cost
-    - remove_neighbor(neighbor_id): remove the neighbor node with the given id
+    - add_neighbor(neighborId, cost): add a neighbor node with the given cost
+    - remove_neighbor(neighborId): remove the neighbor node with the given id
     """
-    def __init__(self, node_id):
-        self.node_id = node_id
+    def __init__(self, nodeId):
+        self.nodeId = nodeId
         self.neighbors = {}
 
-    def add_neighbor(self, neighbor_id, cost):
-        self.neighbors[neighbor_id] = cost
+    def add_neighbor(self, neighborId, cost):
+        self.neighbors[neighborId] = cost
 
-    def remove_neighbor(self, neighbor_id):
-        del self.neighbors[neighbor_id]
+    def remove_neighbor(self, neighborId):
+        del self.neighbors[neighborId]
 
 
-def read_topology_file(topology_file):
+def read_topology_file(topologyFile):
     """
     Read the network topology from the given file and create the corresponding nodes.
 
     Args:
-    - topology_file: the file containing the network topology information
+    - topologyFile: the file containing the network topology information
 
     Returns:
-    - A dictionary of nodes, where the key is the node_id and the value is the Node object.
+    - A dictionary of nodes, where the key is the nodeId and the value is the Node object.
     """
     nodes = {}
-    with open(topology_file, 'r') as file:
+    with open(topologyFile, 'r') as file:
         for line in file:
-            node_id, neighbor_id, cost = map(int, line.strip().split())
-            if node_id not in nodes:
-                nodes[node_id] = Node(node_id)
-            if neighbor_id not in nodes:
-                nodes[neighbor_id] = Node(neighbor_id)
+            nodeId, neighborId, cost = map(int, line.strip().split())
+            if nodeId not in nodes:
+                nodes[nodeId] = Node(nodeId)
+            if neighborId not in nodes:
+                nodes[neighborId] = Node(neighborId)
             # Add neighbors to each node
-            nodes[node_id].add_neighbor(neighbor_id, cost)
-            nodes[neighbor_id].add_neighbor(node_id, cost)
+            nodes[nodeId].add_neighbor(neighborId, cost)
+            nodes[neighborId].add_neighbor(nodeId, cost)
     return nodes
 
 
-def read_message_file(message_file):
+def read_message_file(messageFile):
     """
     Read the messages from the given file.
 
     Args:
-    - message_file: the file containing the messages to be sent
+    - messageFile: the file containing the messages to be sent
 
     Returns:
-    - A list of messages, where each message is a tuple (src_node_id, dest_node_id, msg_text)
+    - A list of messages, where each message is a tuple (srcNodeId, dstNodeId, msgText)
     """
     msgs = []
-    with open(message_file, 'r') as file:
+    with open(messageFile, 'r') as file:
         for line in file:
-            src_node_id, dest_node_id, msg_text = line.split(maxsplit=2)
-            msgs.append((int(src_node_id), int(dest_node_id), msg_text))
+            srcNodeId, dstNodeId, msgText = line.split(maxsplit=2)
+            msgs.append((int(srcNodeId), int(dstNodeId), msgText))
     return msgs
 
 
-def read_topology_change_file(changes_file):
+def read_topology_change_file(changeFile):
     """
     Read the topology changes from the given file.
 
     Args:
-    - changes_file: the file containing the topology changes
+    - changeFile: the file containing the topology changes
 
     Returns:
-    - A list of topology changes, where each change is a tuple (node_id, neighbor_id, cost)
+    - A list of topology changes, where each change is a tuple (nodeId, neighborId, cost)
     """
     changes = []
-    with open(changes_file, 'r') as file:
+    with open(changeFile, 'r') as file:
         for line in file:
-            node_id, neighbor_id, cost = map(int, line.split(maxsplit=2))
-            changes.append((int(node_id), int(neighbor_id), cost))
+            nodeId, neighborId, cost = map(int, line.split(maxsplit=2))
+            changes.append((int(nodeId), int(neighborId), cost))
     return changes
 
 
-def find_next_hop(link_state):
+def find_next_hop(linkState):
     """
     Find the next hop for each destination in the link state information.
 
     Args:
-    - link_state: the link state information for each node
+    - linkState: the link state information for each node
 
     Returns:
     - The updated link state information with the next hop for each destination.
     """
-    for src_node_id, (d, p) in link_state.items():
+    for srcNodeId, (d, p) in linkState.items():
         n = {}
 
-        for dst_node_id, prev_hop_node_id in p.items():
-            curr_node_id = dst_node_id
-            while prev_hop_node_id and (prev_hop_node_id != src_node_id):
-                curr_node_id = prev_hop_node_id
-                prev_hop_node_id = p[prev_hop_node_id]
+        for dstNodeId, prevHopNodeId in p.items():
+            currNodeId = dstNodeId
+            while prevHopNodeId and (prevHopNodeId != srcNodeId):
+                currNodeId = prevHopNodeId
+                prevHopNodeId = p[prevHopNodeId]
 
-            # If the while loop ends, the previous hop of curr_node_id is None (unreachable) or the source node
-            if not prev_hop_node_id:
-                n[dst_node_id] = None
+            # If the while loop ends, the previous hop of currNodeId is None (unreachable) or the source node
+            if not prevHopNodeId:
+                n[dstNodeId] = None
             else:
                 # Set the next hop from the source to get to dst to be the current node (who's previous hop is the source node)
-                n[dst_node_id] = curr_node_id
+                n[dstNodeId] = currNodeId
 
-        link_state[src_node_id] = (d, p, n)
+        linkState[srcNodeId] = (d, p, n)
     
-    return link_state
+    return linkState
 
 
 def count_unreachable_nodes(nodes):
@@ -122,42 +122,42 @@ def count_unreachable_nodes(nodes):
     Returns:
     - A set of node_ids that are unreachable from any other node.
     """
-    unreachable_nodes = set()
-    for node_id, node in nodes.items():
+    unreachableNodes = set()
+    for nodeId, node in nodes.items():
         # If the node has no neighbors, it is unreachable
         if len(node.neighbors) == 0:
-            unreachable_nodes.add(node_id)
-    return unreachable_nodes
+            unreachableNodes.add(nodeId)
+    return unreachableNodes
 
 
-def get_hops(link_state, src_node_id, dest_node_id):
+def get_hops(linkState, srcNodeId, dstNodeId):
     """
     Get the sequence of nodes to traverse from the source node to the destination node.
 
     Args:
-    - link_state: the link state information for each node
+    - linkState: the link state information for each node
 
     Returns:
     - A list of node_ids representing the sequence of nodes to traverse from the source to the destination.
     """
     hops = []
-    curr_node_id = src_node_id
-    while curr_node_id != dest_node_id:
+    currNodeId = srcNodeId
+    while currNodeId != dstNodeId:
         # If a next hop is not specified for the current node to the destination node, the destination is unreachable
-        if not link_state[curr_node_id][2][dest_node_id]:
+        if not linkState[currNodeId][2][dstNodeId]:
             return None
 
         # Add the current node to the hops list
-        hops.append(curr_node_id)
+        hops.append(currNodeId)
 
         # Get the next node to traverse to
-        next_node_id = link_state[curr_node_id][2][dest_node_id]
+        nextNodeId = linkState[currNodeId][2][dstNodeId]
 
         # If the next node is the same as the current node, the destination is unreachable
-        if next_node_id == curr_node_id:
+        if nextNodeId == currNodeId:
             return None
         
-        curr_node_id = next_node_id
+        currNodeId = nextNodeId
 
     return hops
 
@@ -170,68 +170,68 @@ def update_nodes(nodes):
     - nodes: a dictionary of nodes in the network
 
     Returns:
-    - A dictionary of link state information for each node, where the key is the node_id and the value is a tuple (d, p, n),
+    - A dictionary of link state information for each node, where the key is the nodeId and the value is a tuple (d, p, n),
       where d is the path cost to each destination, p is the previous hop to each destination, and n is the next hop to each destination.
     """
-    link_state = {}
+    linkState = {}
 
     # Get unreachable nodes
-    unreachable_nodes = count_unreachable_nodes(nodes)
+    unreachableNodes = count_unreachable_nodes(nodes)
 
-    for node_id, node in nodes.items():
+    for nodeId, node in nodes.items():
         # Intialize n'
-        n_prime = set()
-        n_prime.add(node_id)
+        nPrime = set()
+        nPrime.add(nodeId)
 
         # Initialize d and p
-        d = {node_id: float('inf') for node_id in nodes}
-        p = {node_id: None for node_id in nodes}
+        d = {nodeId: float('inf') for nodeId in nodes}
+        p = {nodeId: None for nodeId in nodes}
 
-        d[node_id] = 0
-        p[node_id] = node_id
+        d[nodeId] = 0
+        p[nodeId] = nodeId
 
         # Initialize step for all neighbors
         for neighbor, cost in node.neighbors.items():
             d[neighbor] = cost
-            p[neighbor] = node_id
+            p[neighbor] = nodeId
 
         # Check that the node is reachable and that there are still nodes to add to n' that are reachable
-        while node_id not in unreachable_nodes and (len(n_prime) < (len(nodes) - len(unreachable_nodes))):
-            min_cost = float('inf')
-            min_node_id = None
-            min_node = None
+        while nodeId not in unreachableNodes and (len(nPrime) < (len(nodes) - len(unreachableNodes))):
+            minCost = float('inf')
+            minNodeId = None
+            minNode = None
 
             # Find the node not in n' with the smallest d
-            for alt_node_id, alt_node in nodes.items():
-                if alt_node_id not in n_prime:
-                    # Check if the cost is less than the current min_cost or if the cost is equal to the current min_cost and the node_id is less (tie breaking)
-                    if d[alt_node_id] < min_cost or (min_node_id and d[alt_node_id] == min_cost and (alt_node_id < min_node_id)):
-                        min_cost = d[alt_node_id]
-                        min_node_id = alt_node_id
-                        min_node = alt_node
+            for altNodeId, altNode in nodes.items():
+                if altNodeId not in nPrime:
+                    # Check if the cost is less than the current minCost or if the cost is equal to the current minCost and the nodeId is less (tie breaking)
+                    if d[altNodeId] < minCost or (minNodeId and d[altNodeId] == minCost and (altNodeId < minNodeId)):
+                        minCost = d[altNodeId]
+                        minNodeId = altNodeId
+                        minNode = altNode
                         
-            if min_node is not None:
+            if minNode is not None:
                 # Add the node to n'
-                n_prime.add(min_node_id)
+                nPrime.add(minNodeId)
 
                 # Update d and p
-                for neighbor, cost in min_node.neighbors.items():
-                    if neighbor not in n_prime:
-                        if d[min_node_id] + cost < d[neighbor]:
-                            d[neighbor] = d[min_node_id] + cost
-                            p[neighbor] = min_node_id
+                for neighbor, cost in minNode.neighbors.items():
+                    if neighbor not in nPrime:
+                        if d[minNodeId] + cost < d[neighbor]:
+                            d[neighbor] = d[minNodeId] + cost
+                            p[neighbor] = minNodeId
                     
-        link_state[node_id] = (d, p)
+        linkState[nodeId] = (d, p)
 
     # Append the hops dictionary to the link state
-    link_state = find_next_hop(link_state)
+    linkState = find_next_hop(linkState)
 
-    # Link state should be a dictionary of node_id -> (d, p, n)
+    # Link state should be a dictionary of nodeId -> (d, p, n)
     # where d is the path cost to each destination, p is the previous hop of each destination, and n is the next hop to reach each destination
-    # Ex. link_state[1][0][4] is the path cost from node 1 to node 4
-    # Ex. link_state[2][1][3] is the previous hop of node 3 when coming from node 2
-    # Ex. link_state[3][2][1] is the next hop to reach node 1 from node 3
-    return link_state
+    # Ex. linkState[1][0][4] is the path cost from node 1 to node 4
+    # Ex. linkState[2][1][3] is the previous hop of node 3 when coming from node 2
+    # Ex. linkState[3][2][1] is the next hop to reach node 1 from node 3
+    return linkState
 
 
 def change_topology(changes, index, nodes):
@@ -246,88 +246,88 @@ def change_topology(changes, index, nodes):
     Returns:
     - The updated link state information after applying the change.
     """
-    node_id, neighbor_id, cost = changes[index]
+    nodeId, neighborId, cost = changes[index]
 
     # Remove links if cost is -999
     if cost == -999:
-        nodes[node_id].remove_neighbor(neighbor_id)
-        nodes[neighbor_id].remove_neighbor(node_id)
+        nodes[nodeId].remove_neighbor(neighborId)
+        nodes[neighborId].remove_neighbor(nodeId)
     # Otherwise update the costs
     else:
-        nodes[node_id].neighbors[neighbor_id] = cost
-        nodes[neighbor_id].neighbors[node_id] = cost
+        nodes[nodeId].neighbors[neighborId] = cost
+        nodes[neighborId].neighbors[nodeId] = cost
 
     # Update the link state information
-    updated_state = update_nodes(nodes)
-    return updated_state
+    updatedState = update_nodes(nodes)
+    return updatedState
 
 
-def write_topology(link_state, file):
+def write_topology(linkState, file):
     """
     Write the node topology information to the given file.
 
     Args:
-    - link_state: the link state information for each node
+    - linkState: the link state information for each node
     - file: the file to write the information to
     """
-    for i in range(1, len(link_state)+1):
-        for j in range(1, len(link_state)+1):
+    for i in range(1, len(linkState)+1):
+        for j in range(1, len(linkState)+1):
             dest = j
-            next_hop = link_state[i][2][j]
-            path_cost = link_state[i][0][j]
+            next_hop = linkState[i][2][j]
+            path_cost = linkState[i][0][j]
 
             if path_cost != float('inf'):
                 file.write(f'{dest} {next_hop} {path_cost}\n')
         file.write('\n')
 
 
-def write_messages(link_state, msgs, file):
+def write_messages(linkState, msgs, file):
     """
     Write the messages and their corresponding paths to the given file.
 
     Args:
-    - link_state: the link state information for each node
+    - linkState: the link state information for each node
     - msgs: a list of messages to be sent
     - file: the file to write the information to
     """
-    for src_node_id, dest_node_id, msg_text in msgs:
-        hops = get_hops(link_state, src_node_id, dest_node_id)
-        cost = link_state[src_node_id][0][dest_node_id]
+    for srcNodeId, dstNodeId, msgText in msgs:
+        hops = get_hops(linkState, srcNodeId, dstNodeId)
+        cost = linkState[srcNodeId][0][dstNodeId]
 
         if cost == float('inf'):
-            file.write(f'from {src_node_id} to {dest_node_id} cost infinite hops unreachable message {msg_text}\n')
+            file.write(f'from {srcNodeId} to {dstNodeId} cost infinite hops unreachable message {msgText}\n')
         else:
-            file.write(f'from {src_node_id} to {dest_node_id} cost {cost} hops {" ".join(str(x) for x in hops)} message {msg_text}\n')
+            file.write(f'from {srcNodeId} to {dstNodeId} cost {cost} hops {" ".join(str(x) for x in hops)} message {msgText}\n')
 
 
-def link_state_routing(topology_file, message_file, changes_file, output_file='output.txt'):
+def link_state_routing(topologyFile, messageFile, changeFile, outputFile='output.txt'):
     """
     Execute the link state routing algorithm using the given files as input.
 
     Args:
-    - topology_file: the file containing the network topology information
-    - message_file: the file containing the messages to be sent
-    - changes_file: the file containing the topology changes
-    - output_file: the file to write the output to
+    - topologyFile: the file containing the network topology information
+    - messageFile: the file containing the messages to be sent
+    - changeFile: the file containing the topology changes
+    - outputFile: the file to write the output to
 
     Returns:
     - A file containing the output of the link state routing algorithm
     """
-    nodes = read_topology_file(topology_file)
-    msgs = read_message_file(message_file)
-    changes = read_topology_change_file(changes_file)
-    file = open(output_file, 'w')
-    file = open(output_file, 'a')
+    nodes = read_topology_file(topologyFile)
+    msgs = read_message_file(messageFile)
+    changes = read_topology_change_file(changeFile)
+    file = open(outputFile, 'w')
+    file = open(outputFile, 'a')
 
-    link_state = update_nodes(nodes)
-    write_topology(link_state, file)
-    write_messages(link_state, msgs, file)
+    linkState = update_nodes(nodes)
+    write_topology(linkState, file)
+    write_messages(linkState, msgs, file)
     
     for i in range(len(changes)):
         file.write('\n')
-        link_state = change_topology(changes, i, nodes)
-        write_topology(link_state, file)
-        write_messages(link_state, msgs, file)
+        linkState = change_topology(changes, i, nodes)
+        write_topology(linkState, file)
+        write_messages(linkState, msgs, file)
 
     file.close()
 
@@ -339,9 +339,9 @@ if __name__ == "__main__":
         print("Usage: python lsr.py <topologyFile> <messageFile> <changesFile> [outputFile]")
         sys.exit(1)
 
-    topology_file = sys.argv[1]
-    message_file = sys.argv[2]
-    changes_file = sys.argv[3]
-    output_file = sys.argv[4] if len(sys.argv) >= 5 else "output.txt"
+    topologyFile = sys.argv[1]
+    messageFile = sys.argv[2]
+    changeFile = sys.argv[3]
+    outputFile = sys.argv[4] if len(sys.argv) >= 5 else "output.txt"
 
-    link_state_routing(topology_file, message_file, changes_file, output_file)
+    link_state_routing(topologyFile, messageFile, changeFile, outputFile)
