@@ -18,8 +18,11 @@ class Node:
                     # print(f"path cost: {path_cost}")
                     # print(f"distnace[node.node_id][1]: {distance[node.node_id][1]}")
                     # print(f"distance[dest][1]: {distance[dest][1]}")
+                    # dst = U, dst+1 = V
+                    # check if cost(U) + cost(U->V) < cost(V)
                     if distance[node.node_id][1] + path_cost < distance[dest][1]:
                         print(f"distances[dest]: {distance[dest]}")
+                        # cost(V) = 
                         distance[dest] = (node.node_id, distance[node.node_id][1] + path_cost)
                     # print("\n")
                     # print(f"node: {node.node_id}")
@@ -93,6 +96,9 @@ def initialize_distance_vector(nodes):
 
 def distance_vector_routing(topology_file, message_file, changes_file, output_file='output.txt'):
     nodes = read_topology_file(topology_file)
+    for node_id, node in nodes.items():
+        print(node_id)
+        print(node.routing_table)
     open(output_file, 'w')
     run_bellman_ford(nodes, output_file)
 

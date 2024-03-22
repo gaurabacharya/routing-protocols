@@ -12,7 +12,7 @@ class Node:
     """
     def __init__(self, node_id):
         self.node_id = node_id
-        self.neighbors = {}  # neighbor_id: cost
+        self.neighbors = {}
 
     def add_neighbor(self, neighbor_id, cost):
         self.neighbors[neighbor_id] = cost
@@ -39,6 +39,7 @@ def read_topology_file(topology_file):
                 nodes[node_id] = Node(node_id)
             if neighbor_id not in nodes:
                 nodes[neighbor_id] = Node(neighbor_id)
+            # Add neighbors to each node
             nodes[node_id].add_neighbor(neighbor_id, cost)
             nodes[neighbor_id].add_neighbor(node_id, cost)
     return nodes
@@ -59,7 +60,6 @@ def read_message_file(message_file):
         for line in file:
             src_node_id, dest_node_id, msg_text = line.split(maxsplit=2)
             msgs.append((int(src_node_id), int(dest_node_id), msg_text))
-
     return msgs
 
 
@@ -94,9 +94,10 @@ def find_next_hop(link_state):
     for node_id, (d, p) in link_state.items():
         n = {}
 
+        # p_node_id is the destination node_id initially and prev_hop is the previous hop to reach the destination
         for p_node_id, prev_hop in p.items():
             curr_node_id = p_node_id
-            while prev_hop != node_id:
+            while prev_hop and (prev_hop != node_id):
                 curr_node_id = prev_hop
 
                 if not prev_hop:
@@ -126,6 +127,7 @@ def count_unreachable_nodes(nodes):
     """
     unreachable_nodes = set()
     for node_id, node in nodes.items():
+        # If the node has no neighbors, it is unreachable
         if len(node.neighbors) == 0:
             unreachable_nodes.add(node_id)
     return unreachable_nodes
@@ -144,12 +146,17 @@ def get_hops(link_state, src_node_id, dest_node_id):
     hops = []
     curr_node_id = src_node_id
     while curr_node_id != dest_node_id:
+        # If a next hop is not specified for the current node to the destination node, the destination is unreachable
         if not link_state[curr_node_id][2][dest_node_id]:
-            break
+            return None
 
+        # Add the current node to the hops list
         hops.append(curr_node_id)
+
+        # Get the next node to traverse to
         next_node_id = link_state[curr_node_id][2][dest_node_id]
 
+        # If the next node is the same as the current node, the destination is unreachable
         if next_node_id == curr_node_id:
             return None
         
@@ -200,6 +207,7 @@ def update_nodes(nodes):
             # Find the node not in n' with the smallest d
             for alt_node_id, alt_node in nodes.items():
                 if alt_node_id not in n_prime:
+                    # Check if the cost is less than the current min_cost or if the cost is equal to the current min_cost and the node_id is less (tie breaking)
                     if d[alt_node_id] < min_cost or (min_node_id and d[alt_node_id] == min_cost and (alt_node_id < min_node_id)):
                         min_cost = d[alt_node_id]
                         min_node_id = alt_node_id
@@ -218,7 +226,14 @@ def update_nodes(nodes):
                     
         link_state[node_id] = (d, p)
 
+    # Append the hops dictionary to the link state
     link_state = find_next_hop(link_state)
+
+    # Link state should be a dictionary of node_id -> (d, p, n)
+    # where d is the path cost to each destination, p is the previous hop of each destination, and n is the next hop to reach each destination
+    # Ex. link_state[1][0][4] is the path cost from node 1 to node 4
+    # Ex. link_state[2][1][3] is the previous hop of node 3 when coming from node 2
+    # Ex. link_state[3][2][1] is the next hop to reach node 1 from node 3
     return link_state
 
 
@@ -236,13 +251,16 @@ def change_topology(changes, index, nodes):
     """
     node_id, neighbor_id, cost = changes[index]
 
+    # Remove links if cost is -999
     if cost == -999:
         nodes[node_id].remove_neighbor(neighbor_id)
         nodes[neighbor_id].remove_neighbor(node_id)
+    # Otherwise update the costs
     else:
         nodes[node_id].neighbors[neighbor_id] = cost
         nodes[neighbor_id].neighbors[node_id] = cost
 
+    # Update the link state information
     updated_state = update_nodes(nodes)
     return updated_state
 
