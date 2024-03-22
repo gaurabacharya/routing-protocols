@@ -27,9 +27,9 @@ class Node:
     def update_routing_table(self, destination, nextHop, pathCost):
         self.routingTable[destination] = (nextHop, pathCost)
             
-def read_topology_file(topology_file):
+def read_topology_file(topologyFile):
     nodes = {}
-    with open(topology_file, 'r') as file:
+    with open(topologyFile, 'r') as file:
         for line in file:
             nodeId, neighborId, cost = map(int, line.strip().split())
             if nodeId not in nodes:
@@ -40,18 +40,18 @@ def read_topology_file(topology_file):
             nodes[neighborId].add_neighbor(nodeId, cost)
     return nodes          
 
-def read_message_file(message_file):
+def read_message_file(messageFile):
     msgs = []
-    with open(message_file, 'r') as file:
+    with open(messageFile, 'r') as file:
         for line in file:
             src_nodeId, dest_nodeId, msg_text = line.split(maxsplit=2)
             msgs.append((int(src_nodeId), int(dest_nodeId), msg_text))
 
     return msgs
 
-def read_topology_change_file(changes_file):
+def read_topology_change_file(changesFile):
     changes = []
-    with open(changes_file, 'r') as file:
+    with open(changesFile, 'r') as file:
         for line in file:
             nodeId, neighborId, cost = map(int, line.split(maxsplit=2))
             changes.append((int(nodeId), int(neighborId), cost))
@@ -70,8 +70,8 @@ def bellman_ford(dst, routers, links):
                 nexthop[r2] = r1
     return distance, nexthop
 
-def update_distance_vector(node, distance_vector, nexthop):
-    for destination, cost in distance_vector.items():
+def update_distance_vector(node, distanceVector, nexthop):
+    for destination, cost in distanceVector.items():
         # if destination != node.nodeId and destination in nexthop and cost != float('inf'):
         if destination in nexthop and cost != float("inf"):
             nextNode = 0
@@ -91,16 +91,16 @@ def update_distance_vector(node, distance_vector, nexthop):
         
 def run_bellman_ford(nodes, routers, links):
     for nodeId, node in nodes.items():
-        distance_vector, nexthop = bellman_ford(nodeId, routers, links)
+        distanceVector, nexthop = bellman_ford(nodeId, routers, links)
         nexthop[nodeId] = nodeId
-        update_distance_vector(node, distance_vector, nexthop)
+        update_distance_vector(node, distanceVector, nexthop)
         
-def write_routing_table(nodes, output_file):
-    sorted_nodes = dict(sorted(nodes.items()))
-    for nodeId, node in sorted_nodes.items():
-        sorted_table = sorted(node.routingTable.items(), key=lambda x: x[0])
-        with open(output_file, 'a') as f:
-            for dest, (nextHop, pathCost) in sorted_table:
+def write_routing_table(nodes, outputFile):
+    sortedNodes = dict(sorted(nodes.items()))
+    for nodeId, node in sortedNodes.items():
+        sortedTable = sorted(node.routingTable.items(), key=lambda x: x[0])
+        with open(outputFile, 'a') as f:
+            for dest, (nextHop, pathCost) in sortedTable:
                 f.write(f"{dest} {nextHop} {pathCost}\n")
             f.write("\n")
 
@@ -113,7 +113,7 @@ def get_links(nodes):
 
 def write_messages(nodes, msgs):
     
-    with open(output_file, 'a') as f:
+    with open(outputFile, 'a') as f:
         for msg in msgs:
             if nodes[msg[1]].nodeId not in nodes[msg[0]].routingTable.keys():
                 f.write(f"from {msg[0]} to {msg[1]} cost infinite hops unreachable message {msg[2]}")
@@ -143,24 +143,24 @@ def change_nodes(nodes, change):
         nodes[r1].add_neighbor(r2, pathCost)
         nodes[r2].add_neighbor(r1, pathCost)
 
-def distance_vector_routing(topology_file, message_file, changes_file, output_file='output.txt'):
-    nodes = read_topology_file(topology_file)
+def distanceVector_routing(topologyFile, messageFile, changesFile, outputFile='output.txt'):
+    nodes = read_topology_file(topologyFile)
     routers = list(nodes.keys())
     links = get_links(nodes)  # list of (r1, r2, dist)
  
-    open(output_file, 'w')
+    open(outputFile, 'w')
     run_bellman_ford(nodes, routers, links)
-    write_routing_table(nodes, output_file)
-    msgs = read_message_file(message_file)
+    write_routing_table(nodes, outputFile)
+    msgs = read_message_file(messageFile)
     write_messages(nodes, msgs)
-    changes = read_topology_change_file(changes_file)
+    changes = read_topology_change_file(changesFile)
 
     for change in changes:
         change_nodes(nodes, change)
         routers = list(nodes.keys())
         links = get_links(nodes)
         run_bellman_ford(nodes, routers, links)
-        write_routing_table(nodes, output_file)
+        write_routing_table(nodes, outputFile)
         write_messages(nodes, msgs)
 
 if __name__ == "__main__":
@@ -170,9 +170,9 @@ if __name__ == "__main__":
         print("Usage: python src/distancevector.py <topologyFile> <messageFile> <changesFile> [outputFile]")
         sys.exit(1)
 
-    topology_file = sys.argv[1]
-    message_file = sys.argv[2]
-    changes_file = sys.argv[3]
-    output_file = sys.argv[4] if len(sys.argv) >= 5 else "output.txt"
+    topologyFile = sys.argv[1]
+    messageFile = sys.argv[2]
+    changesFile = sys.argv[3]
+    outputFile = sys.argv[4] if len(sys.argv) >= 5 else "output.txt"
 
-    distance_vector_routing(topology_file, message_file, changes_file, output_file)
+    distanceVector_routing(topologyFile, messageFile, changesFile, outputFile)
