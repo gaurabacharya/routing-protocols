@@ -1,5 +1,3 @@
-"""! @brief Defines the sensor classes."""
-
 ##
 # @file distancevector.py
 
@@ -21,11 +19,9 @@ class Node:
         """! Initializing the Node object.
 
         @param nodeId The unique identifier of the node.
-
-        @return An instance of the Node class initialized with the specified name.
         """
         self.nodeId = nodeId
-        self.routingTable = {}  # destination: (nextHop, pathCost)
+        self.routingTable = {}  
         self.neighbors = {}
 
     def add_neighbor(self, neighborId, cost):
@@ -61,11 +57,9 @@ class Node:
 def read_topology_file(topologyFile):
     """! Read the network topology from the given file and create the corresponding nodes.
 
-    Args:
-    - topologyFile: the file containing the network topology information.
+    @param topologyFile the file containing the network topology information.
 
-    Returns:
-    - A dictionary of nodes, where the key is the node_id and the value is the Node object.
+    @return nodes  A dictionary of nodes, where the key is the node_id and the value is the Node object.
     """
     nodes = {}
     with open(topologyFile, 'r') as file:
@@ -80,14 +74,11 @@ def read_topology_file(topologyFile):
     return nodes          
 
 def read_message_file(messageFile):
-    """
-    Read the messages from the given file.
+    """! Read the messages from the given file.
 
-    Args:
-    - messageFile: the file containing the messages to be sent.
+    @param messageFile  The file containing the messages to be sent.
 
-    Returns:
-    - A list of messages, where each message is a tuple (srcNodeId, destNodeId, msgText).
+    @return msgs    A list of messages, where each message is a tuple (srcNodeId, destNodeId, msgText).
     """
     msgs = []
     with open(messageFile, 'r') as file:
@@ -98,14 +89,11 @@ def read_message_file(messageFile):
     return msgs
 
 def read_topology_change_file(changesFile):
-    """
-    Read the topology changes from the given file.
+    """! Read the topology changes from the given file.
 
-    Args:
-    - changes_file: the file containing the topology changes.
+    @param changesFile    The file containing the topology changes.
 
-    Returns:
-    - A list of topology changes, where each change is a tuple (nodeId, neighborId, cost).
+    @return changes    A list of topology changes, where each change is a tuple (nodeId, neighborId, cost).
     """
     changes = []
     with open(changesFile, 'r') as file:
@@ -115,17 +103,15 @@ def read_topology_change_file(changesFile):
     return changes
 
 def bellman_ford(dst, routers, links):
-    """
-    Run bellman_ford algorithm to find the distances from one to all other possible nodes with a route.
+    """! Run bellman_ford algorithm to find the distances from one to all other possible nodes with a route.
 
-    Args:
-    - dst: A nodeId of specific node. 
-    - routers: A list of all nodes in the topology. 
-    - links: A list of tuples that establish a connection between nodes in the form (nodeId, neighborId, cost).
+    
+    @param dst    A nodeId of specific node. 
+    @param routers A list of all nodes in the topology. 
+    @param links  A list of tuples that establish a connection between nodes in the form (nodeId, neighborId, cost).
 
-    Returns:
-    - distance: a dictionary where each key is a destination node, and each value is a tuple containing the nextHop and pathCost.
-    - nexthop: a dictionary of where each key is a node, and each value is the next hop of the key to the destination node dst. 
+    @return distance    A dictionary where each key is a destination node, and each value is a tuple containing the nextHop and pathCost.
+    @return nexthop     A dictionary of where each key is a node, and each value is the next hop of the key to the destination node dst. 
     """
     INFINITY = float('inf')
     distance = {r: INFINITY for r in routers}
@@ -141,16 +127,15 @@ def bellman_ford(dst, routers, links):
     return distance, nexthop
 
 def update_distance_vector(node, distanceVector, nexthop):
-    """ 
-    Update the distance vector routing table for a specific node. 
+    """! Update the distance vector routing table for a specific node. 
 
-    Args:
-    - node: a node in the topology.
-    - distanceVector: a dictionary where each key is a destination node, and each value is a tuple containing the nextHop and pathCost.
-    - nexthop: a dictionary of where each key is a node, and each value is the next hop of the key to the destination node dst.
+    @param node              A node in the topology.
+    @param distanceVector    A dictionary where each key is a destination node, and each value is a tuple containing the nextHop and pathCost.
+    @param nexthop           A dictionary of where each key is a node, and each value is the next hop of the key to the destination node dst.
+
+    @return None
     """
     for destination, cost in distanceVector.items():
-        # if destination != node.nodeId and destination in nexthop and cost != float('inf'):
         if destination in nexthop and cost != float("inf"):
             nextNode = 0
             if destination == node.nodeId:
@@ -168,13 +153,13 @@ def update_distance_vector(node, distanceVector, nexthop):
                 node.update_routing_table(destination, nextNode, cost)
         
 def run_bellman_ford(nodes, routers, links):
-    """
-    Loop through each node in the topology to run the bellman_form algorithm and update the routing table.
+    """! Loop through each node in the topology to run the bellman_form algorithm and update the routing table.
 
-    Args:
-    - nodes: A dictionary of nodes, where the key is the node_id and the value is the Node object.
-    - routers: A list of all nodes in the topology.
-    - links: A list of tuples that establish a connection between nodes in the form (nodeId, neighborId, cost).
+    @param nodes    A dictionary of nodes, where the key is the node_id and the value is the Node object.
+    @param routers  A list of all nodes in the topology.
+    @param links    A list of tuples that establish a connection between nodes in the form (nodeId, neighborId, cost).
+
+    @return None
     """
     for nodeId, node in nodes.items():
         distanceVector, nexthop = bellman_ford(nodeId, routers, links)
@@ -182,12 +167,12 @@ def run_bellman_ford(nodes, routers, links):
         update_distance_vector(node, distanceVector, nexthop)
         
 def write_routing_table(nodes, outputFile):
-    """
-    Write the routing table to the outputFile for each node.
+    """! Write the routing table to the outputFile for each node.
 
-    Args:
-    - nodes: A dictionary of nodes, where the key is the node_id and the value is the Node object.
-    - outputFile: A file where all the output results and messages are written to.
+    @param nodes        A dictionary of nodes, where the key is the node_id and the value is the Node object.
+    @param outputFile   A file where all the output results and messages are written to.
+
+    @return The routing table for each node in the topology written to the outputFile.
     """
     sortedNodes = dict(sorted(nodes.items()))
     for nodeId, node in sortedNodes.items():
@@ -198,14 +183,11 @@ def write_routing_table(nodes, outputFile):
             f.write("\n")
 
 def get_links(nodes):
-    """
-    Get all links and the costs between nodes.
+    """! Get all links and the costs between nodes.
 
-    Args:
-    - nodes: A dictionary of nodes, where the key is the node_id and the value is the Node object.
+    @param nodes    A dictionary of nodes, where the key is the node_id and the value is the Node object.
 
-    Returns:
-    - links: A list of tuples that establish a connection between nodes in the form (nodeId, neighborId, cost).
+    @return links    A list of tuples that establish a connection between nodes in the form (nodeId, neighborId, cost).
     """
     links = []
     for nodeId, node in nodes.items():
@@ -214,13 +196,13 @@ def get_links(nodes):
     return links
 
 def write_messages(nodes, msgs, outputFile):
-    """
-    Write the results from the messages based on the current network topology.
+    """! Write the results from the messages based on the current network topology.
 
-    Args:
-    - nodes: A dictionary of nodes, where the key is the node_id and the value is the Node object.
-    - msgs: A list containing important items from the message file where each item is a tuple in the form (sourceNode, destinationNode, message).
-    - outputFile: A file where all the output results and messages are written to.
+    @param nodes         A dictionary of nodes, where the key is the node_id and the value is the Node object.
+    @param msgs          A list containing important items from the message file where each item is a tuple in the form (sourceNode, destinationNode, message).
+    @param outputFile    A file where all the output results and messages are written to.
+
+    @return The results from the messages written to the outputFile.
     """
     with open(outputFile, 'a') as f:
         for msg in msgs:
@@ -242,12 +224,12 @@ def write_messages(nodes, msgs, outputFile):
         f.write("\n")
 
 def change_nodes(nodes, change):
-    """
-    Changes the nodes in the topology based on a change from the topology changes file.
+    """! Changes the nodes in the topology based on a change from the topology changes file.
 
-    Args:
-    - nodes: A dictionary of nodes, where the key is the node_id and the value is the Node object.
-    - change: A tuple containing the changes involved in the form with a new link cost between nodes (nodeId, neighbourId, linkCost).
+    @param nodes    A dictionary of nodes, where the key is the node_id and the value is the Node object.
+    @param change   A tuple containing the changes involved in the form with a new link cost between nodes (nodeId, neighbourId, linkCost).
+
+    @return None
     """
     r1 = change[0]
     r2 = change[1]
@@ -260,19 +242,18 @@ def change_nodes(nodes, change):
         nodes[r2].add_neighbor(r1, pathCost)
 
 def distanceVector_routing(topologyFile, messageFile, changesFile, outputFile='output.txt'):
-    """
-    The controller functions which runs the distance vector routing including reading the initial topology, reading messages, and reading changes.
+    """! The controller functions which runs the distance vector routing including reading the initial topology, reading messages, and reading changes.
 
-    Args:
-    - topologyFile: The filepath of the initial topology of the network.
-    - messageFile: The filepath of the messages that need to be considered to route to. 
-    - changesFile: The filepath of the changes to add in the network topology.
-    - outputFile: A filepath where all the output results and messages are written to.
+    @param topologyFile    The filepath of the initial topology of the network.
+    @param messageFile     The filepath of the messages that need to be considered to route to. 
+    @param changesFile     The filepath of the changes to add in the network topology.
+    @param outputFile      A filepath where all the output results and messages are written to.
 
+    @return None
     """
     nodes = read_topology_file(topologyFile)
     routers = list(nodes.keys())
-    links = get_links(nodes)  # list of (r1, r2, dist)
+    links = get_links(nodes)  
  
     open(outputFile, 'w')
     run_bellman_ford(nodes, routers, links)
@@ -287,7 +268,7 @@ def distanceVector_routing(topologyFile, messageFile, changesFile, outputFile='o
         links = get_links(nodes)
         run_bellman_ford(nodes, routers, links)
         write_routing_table(nodes, outputFile)
-        write_messages(nodes, msgs)
+        write_messages(nodes, msgs, outputFile)
 
 if __name__ == "__main__":
     import sys

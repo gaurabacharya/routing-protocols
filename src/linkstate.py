@@ -1,6 +1,5 @@
 class Node:
-    """
-    Represents a node in the network topology.
+    """! Represents a node in the network topology.
 
     Attributes:
     - nodeId: the unique identifier of the node
@@ -11,25 +10,39 @@ class Node:
     - remove_neighbor(neighborId): remove the neighbor node with the given id
     """
     def __init__(self, nodeId):
+        """! Initializing the Node object.
+
+        @param nodeId The unique identifier of the node.
+        """
         self.nodeId = nodeId
         self.neighbors = {}
 
     def add_neighbor(self, neighborId, cost):
+        """! Add a neighbor to the current node object.
+
+        @param neighborId   The unique identifier of a neighbor node.
+        @param cost         Cost of the link between the node and the neighbor.
+
+        @return An instance of the node with an added neighbor.
+        """
         self.neighbors[neighborId] = cost
 
     def remove_neighbor(self, neighborId):
+        """! Remove a neighbor from the current node object.
+
+        @param neighborId   The unique idenifier of a neighbor node.
+
+        @return An instance of the node with a removed neighbor.
+        """
         del self.neighbors[neighborId]
 
 
 def read_topology_file(topologyFile):
-    """
-    Read the network topology from the given file and create the corresponding nodes.
+    """! Read the network topology from the given file and create the corresponding nodes.
 
-    Args:
-    - topologyFile: the file containing the network topology information
+    @param topologyFile the file containing the network topology information
 
-    Returns:
-    - A dictionary of nodes, where the key is the nodeId and the value is the Node object.
+    @return A dictionary of nodes, where the key is the nodeId and the value is the Node object.
     """
     nodes = {}
     with open(topologyFile, 'r') as file:
@@ -46,14 +59,11 @@ def read_topology_file(topologyFile):
 
 
 def read_message_file(messageFile):
-    """
-    Read the messages from the given file.
+    """! Read the messages from the given file.
 
-    Args:
-    - messageFile: the file containing the messages to be sent
+    @param messageFile the file containing the messages to be sent
 
-    Returns:
-    - A list of messages, where each message is a tuple (srcNodeId, dstNodeId, msgText)
+    @return A list of messages, where each message is a tuple (srcNodeId, dstNodeId, msgText)
     """
     msgs = []
     with open(messageFile, 'r') as file:
@@ -64,14 +74,11 @@ def read_message_file(messageFile):
 
 
 def read_topology_change_file(changeFile):
-    """
-    Read the topology changes from the given file.
+    """! Read the topology changes from the given file.
 
-    Args:
-    - changeFile: the file containing the topology changes
+    @param changeFile the file containing the topology changes
 
-    Returns:
-    - A list of topology changes, where each change is a tuple (nodeId, neighborId, cost)
+    @return A list of topology changes, where each change is a tuple (nodeId, neighborId, cost)
     """
     changes = []
     with open(changeFile, 'r') as file:
@@ -82,14 +89,11 @@ def read_topology_change_file(changeFile):
 
 
 def find_next_hop(linkState):
-    """
-    Find the next hop for each destination in the link state information.
+    """! Find the next hop for each destination in the link state information.
 
-    Args:
-    - linkState: the link state information for each node
+    @param linkState The link state information for each node
 
-    Returns:
-    - The updated link state information with the next hop for each destination.
+    @return The updated link state information with the next hop for each destination.
     """
     for srcNodeId, (d, p) in linkState.items():
         n = {}
@@ -113,14 +117,11 @@ def find_next_hop(linkState):
 
 
 def count_unreachable_nodes(nodes):
-    """
-    Count the number of unreachable nodes in the network.
+    """! Count the number of unreachable nodes in the network.
 
-    Args:
-    - nodes: a dictionary of nodes in the network
+    @param nodes A dictionary of nodes in the network
 
-    Returns:
-    - A set of node_ids that are unreachable from any other node.
+    @return A set of node_ids that are unreachable from any other node.
     """
     unreachableNodes = set()
     for nodeId, node in nodes.items():
@@ -131,14 +132,13 @@ def count_unreachable_nodes(nodes):
 
 
 def get_hops(linkState, srcNodeId, dstNodeId):
-    """
-    Get the sequence of nodes to traverse from the source node to the destination node.
+    """! Get the sequence of nodes to traverse from the source node to the destination node.
 
-    Args:
-    - linkState: the link state information for each node
+    @param linkState the link state information for each node
+    @param srcNodeId the nodeId of the source node
+    @param dstNodeId the nodeId of the destination node
 
-    Returns:
-    - A list of node_ids representing the sequence of nodes to traverse from the source to the destination.
+    @return A list of nodeIds representing the sequence of nodes to traverse from the source to the destination.
     """
     hops = []
     currNodeId = srcNodeId
@@ -163,14 +163,11 @@ def get_hops(linkState, srcNodeId, dstNodeId):
 
 
 def update_nodes(nodes):
-    """
-    Update the link state information for each node in the network.
+    """! Update the link state information for each node in the network.
 
-    Args:
-    - nodes: a dictionary of nodes in the network
+    @param nodes a dictionary of nodes in the network
 
-    Returns:
-    - A dictionary of link state information for each node, where the key is the nodeId and the value is a tuple (d, p, n),
+    @return A dictionary of link state information for each node, where the key is the nodeId and the value is a tuple (d, p, n),
       where d is the path cost to each destination, p is the previous hop to each destination, and n is the next hop to each destination.
     """
     linkState = {}
@@ -235,16 +232,13 @@ def update_nodes(nodes):
 
 
 def change_topology(changes, index, nodes):
-    """
-    Change the network topology based on the given changes.
+    """! Change the network topology based on the given changes.
 
-    Args:
-    - changes: a list of topology changes
-    - index: the index of the change to apply
-    - nodes: a dictionary of nodes in the network
+    @param changes a list of topology changes
+    @param index   the index of the change to apply
+    @param nodes   a dictionary of nodes in the network
 
-    Returns:
-    - The updated link state information after applying the change.
+    @return The updated link state information after applying the change.
     """
     nodeId, neighborId, cost = changes[index]
 
@@ -263,12 +257,10 @@ def change_topology(changes, index, nodes):
 
 
 def write_topology(linkState, file):
-    """
-    Write the node topology information to the given file.
+    """! Write the node topology information to the given file.
 
-    Args:
-    - linkState: the link state information for each node
-    - file: the file to write the information to
+    @param linkState the link state information for each node
+    @param file the file to write the information to
     """
     for i in range(1, len(linkState)+1):
         for j in range(1, len(linkState)+1):
@@ -282,13 +274,11 @@ def write_topology(linkState, file):
 
 
 def write_messages(linkState, msgs, file):
-    """
-    Write the messages and their corresponding paths to the given file.
+    """! Write the messages and their corresponding paths to the given file.
 
-    Args:
-    - linkState: the link state information for each node
-    - msgs: a list of messages to be sent
-    - file: the file to write the information to
+    @param linkState    the link state information for each node
+    @param msgs         a list of messages to be sent
+    @param file         the file to write the information to
     """
     for srcNodeId, dstNodeId, msgText in msgs:
         hops = get_hops(linkState, srcNodeId, dstNodeId)
@@ -301,17 +291,14 @@ def write_messages(linkState, msgs, file):
 
 
 def link_state_routing(topologyFile, messageFile, changeFile, outputFile='output.txt'):
-    """
-    Execute the link state routing algorithm using the given files as input.
+    """! Execute the link state routing algorithm using the given files as input.
 
-    Args:
-    - topologyFile: the file containing the network topology information
-    - messageFile: the file containing the messages to be sent
-    - changeFile: the file containing the topology changes
-    - outputFile: the file to write the output to
+    @param topologyFile    the file containing the network topology information
+    @param messageFile     the file containing the messages to be sent
+    @param changeFile      the file containing the topology changes
+    @param outputFile      the file to write the output to
 
-    Returns:
-    - A file containing the output of the link state routing algorithm
+    @return A file containing the output of the link state routing algorithm
     """
     nodes = read_topology_file(topologyFile)
     msgs = read_message_file(messageFile)
