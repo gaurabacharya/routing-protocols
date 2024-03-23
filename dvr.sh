@@ -37,7 +37,7 @@ fi
 
 # Execute Distance Vector Routing
 if [ -z "$outputFile" ]; then
-    python distancevector.py "$topologyFile" "$messageFile" "$changesFile"
+    python src/distancevector.py "$topologyFile" "$messageFile" "$changesFile"
 else
-    python distancevector.py "$topologyFile" "$messageFile" "$changesFile" > "$outputFile"
+    python src/distancevector.py "$topologyFile" "$messageFile" "$changesFile" > "$outputFile"
 fi
