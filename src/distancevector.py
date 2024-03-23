@@ -1,6 +1,10 @@
+"""! @brief Defines the sensor classes."""
+
+##
+# @file distancevector.py
+
 class Node:
-    """
-    Represents a node in the network topology.
+    """! @brief Defines a node in the network topology.
 
     Attributes:
     - nodeId: the unique identifier of the node.
@@ -14,22 +18,48 @@ class Node:
     - update_routing_table(destination, nextHop, pathCost): add an element to the routing table dictionary.
     """
     def __init__(self, nodeId):
+        """! Initializing the Node object.
+
+        @param nodeId The unique identifier of the node.
+
+        @return An instance of the Node class initialized with the specified name.
+        """
         self.nodeId = nodeId
         self.routingTable = {}  # destination: (nextHop, pathCost)
         self.neighbors = {}
 
     def add_neighbor(self, neighborId, cost):
+        """! Add a neighbor to the current node object.
+
+        @param neighborId   The unique identifier of a neighbor node.
+        @param cost         Cost of the link between the node and the neighbor.
+
+        @return An instance of the node with an added neighbor.
+        """
         self.neighbors[neighborId] = cost
 
     def remove_neighbor(self, neighborId):
+        """! Remove a neighbor from the current node object.
+
+        @param neighborId   The unique idenifier of a neighbor node.
+
+        @return An instance of the node with a removed neighbor.
+        """
         del self.neighbors[neighborId]
 
     def update_routing_table(self, destination, nextHop, pathCost):
+        """! Update the routing table of the Node.
+
+        @param destination  The nodeId of the destination node.
+        @param nextHop      The nodeId of the nextHop from this node to the destination that creates the shortest path.
+        @param pathCost     The total pathCost from this node to the destination.
+
+        @return An instance of the node with an updated routing table.
+        """
         self.routingTable[destination] = (nextHop, pathCost)
             
 def read_topology_file(topologyFile):
-    """
-    Read the network topology from the given file and create the corresponding nodes.
+    """! Read the network topology from the given file and create the corresponding nodes.
 
     Args:
     - topologyFile: the file containing the network topology information.
